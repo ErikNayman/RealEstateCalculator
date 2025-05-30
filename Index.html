@@ -112,7 +112,7 @@ function calcCash(){
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
-    '<tr><td>Δ-spread d</td><td>'+fmt(d)+' %</td></tr>'+
+    '<tr><td>Годовой перевес недвижимости над альтернативой d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
     '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
   document.getElementById('cashOutput').innerHTML=html;
@@ -133,7 +133,7 @@ function calcMortgage(){
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
-    '<tr><td>Δ-spread d</td><td>'+fmt(d)+' %</td></tr>'+
+    '<tr><td>Годовой перевес недвижимости над альтернативой d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
     '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
   document.getElementById('mortgageOutput').innerHTML=html;
