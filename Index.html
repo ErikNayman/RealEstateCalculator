@@ -2,24 +2,24 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Rent vs Buy Calculator – Kyiv 2025</title>
+<title>Rent vs Buy Calculator</title>
 <style>
-  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;display:flex;justify-content:center;background:#f5f5f5;}
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f5f5;display:flex;justify-content:center;}
   .container{max-width:720px;width:100%;background:#fff;margin:1rem;padding:1rem;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
-  h1{text-align:center;margin-top:0;}
   .tabs{display:flex;border-bottom:1px solid #ccc;margin-bottom:1rem;}
-  .tab-btn{flex:1;padding:0.5rem;background:none;border:none;font-weight:bold;cursor:pointer;}
-  .tab-btn.active{border-bottom:2px solid #007bff;color:#007bff;}
+  .tabs input{display:none;}
+  .tabs label{flex:1;padding:0.5rem;text-align:center;cursor:pointer;border-bottom:2px solid transparent;}
+  #cashTab:checked + label,#mortgageTab:checked + label{border-color:#007bff;color:#007bff;font-weight:bold;}
   .tab-content{display:none;}
-  .tab-content.active{display:block;}
+  #cashTab:checked ~ #cashContent,#mortgageTab:checked ~ #mortgageContent{display:block;}
   .inputs{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;}
-  .inputs label{font-size:0.9rem;display:flex;flex-direction:column;}
+  .inputs label{display:flex;flex-direction:column;font-size:0.9rem;}
   .inputs input{padding:0.3rem;border:1px solid #ccc;border-radius:4px;}
-  .tip{cursor:help;margin-left:0.2rem;color:#888;}
-  .calc-btn{margin-top:0.5rem;padding:0.5rem;border:none;border-radius:4px;background:#007bff;color:#fff;cursor:pointer;width:100%;}
+  .calc-btn{margin-top:0.5rem;width:100%;background:#007bff;color:#fff;border:none;padding:0.5rem;border-radius:4px;cursor:pointer;}
   .results{border:1px solid #ccc;border-radius:4px;padding:0.5rem;margin-top:0.5rem;}
-  .green{color:#2e7d32;}
-  .red{color:#c62828;}
+  .verdict{font-weight:bold;padding:0.5rem;margin-top:0.5rem;border-radius:4px;text-align:center;}
+  .green{background:#e8f5e9;}
+  .red{background:#ffebee;}
   .yellow{background:#fff9c4;padding:0 0.2em;}
   @media(max-width:600px){.inputs{grid-template-columns:1fr;}}
   .footer{text-align:center;margin-top:1rem;}
@@ -29,26 +29,33 @@
 <div class="container">
   <h1>Rent vs Buy Calculator</h1>
   <div class="tabs">
-    <button class="tab-btn active" data-tab="cash">Cash purchase</button>
-    <button class="tab-btn" data-tab="mortgage">Mortgage</button>
+    <input type="radio" id="cashTab" name="tab" checked>
+    <label for="cashTab">Cash purchase</label>
+    <input type="radio" id="mortgageTab" name="tab">
+    <label for="mortgageTab">Mortgage</label>
   </div>
 
-  <div id="cash" class="tab-content active">
-    <h2>Cash purchase</h2>
+  <div id="cashContent" class="tab-content">
     <div class="inputs">
-      <label>Purchase price, $<span class="tip" title="Сколько стоит жильё">ℹ️</span>
+      <label>Purchase price, $
         <input id="price" type="number" min="0" step="0.1" value="90000">
       </label>
-      <label>Monthly rent, $<span class="tip" title="Сумма аренды за месяц">ℹ️</span>
-        <input id="rent" type="number" min="0" step="0.1" value="450">
+      <label>Annual rent (100 % occupancy), $
+        <input id="rent" type="number" min="0" step="0.1" value="6000">
       </label>
-      <label>Round-trip transaction cost, %<span class="tip" title="Комиссии при покупке и продаже">ℹ️</span>
+      <label>Occupancy, %
+        <input id="occupancy" type="number" min="0" step="0.1" value="80">
+      </label>
+      <label>OPEX, % of price / yr
+        <input id="opex" type="number" min="0" step="0.1" value="1">
+      </label>
+      <label>Round-trip transaction cost, %
         <input id="txCost" type="number" min="0" step="0.1" value="8">
       </label>
-      <label>Expected price growth, % / yr<span class="tip" title="Рост стоимости жилья в год">ℹ️</span>
+      <label>Expected price growth, % / yr
         <input id="growth" type="number" min="0" step="0.1" value="3">
       </label>
-      <label>Alternative return (USD), % / yr<span class="tip" title="Доходность другого вложения">ℹ️</span>
+      <label>Alternative USD return, % / yr
         <input id="altReturn" type="number" min="0" step="0.1" value="6">
       </label>
     </div>
@@ -56,28 +63,33 @@
     <div id="cashOutput" class="results"></div>
   </div>
 
-  <div id="mortgage" class="tab-content">
-    <h2>Mortgage</h2>
+  <div id="mortgageContent" class="tab-content">
     <div class="inputs">
-      <label>Purchase price, $<span class="tip" title="Стоимость недвижимости">ℹ️</span>
+      <label>Purchase price, $
         <input id="priceM" type="number" min="0" step="0.1" value="90000">
       </label>
-      <label>Monthly rent, $<span class="tip" title="Месячная аренда">ℹ️</span>
-        <input id="rentM" type="number" min="0" step="0.1" value="450">
+      <label>Annual rent (100 % occupancy), $
+        <input id="rentM" type="number" min="0" step="0.1" value="6000">
       </label>
-      <label>Round-trip transaction cost, %<span class="tip" title="Все комиссии">ℹ️</span>
+      <label>Occupancy, %
+        <input id="occupancyM" type="number" min="0" step="0.1" value="80">
+      </label>
+      <label>OPEX, % of price / yr
+        <input id="opexM" type="number" min="0" step="0.1" value="1">
+      </label>
+      <label>Round-trip transaction cost, %
         <input id="txCostM" type="number" min="0" step="0.1" value="8">
       </label>
-      <label>Expected price growth, % / yr<span class="tip" title="Рост стоимости">ℹ️</span>
+      <label>Expected price growth, % / yr
         <input id="growthM" type="number" min="0" step="0.1" value="3">
       </label>
-      <label>Mortgage rate, % / yr<span class="tip" title="Процент по кредиту">ℹ️</span>
+      <label>Mortgage rate, % / yr
         <input id="interest" type="number" min="0" step="0.1" value="7">
       </label>
-      <label>LTV (loan / price), %<span class="tip" title="Размер кредита в % от цены">ℹ️</span>
+      <label>LTV, %
         <input id="ltv" type="number" min="0" step="0.1" value="80">
       </label>
-      <label>Alternative return (USD), % / yr<span class="tip" title="Доходность другого вложения">ℹ️</span>
+      <label>Alternative USD return, % / yr (on down-payment)
         <input id="altReturnM" type="number" min="0" step="0.1" value="6">
       </label>
     </div>
@@ -87,58 +99,52 @@
   <div class="footer"><a href="https://t.me/%D0%92%D0%B0%D1%88%D0%9A%D0%B0%D0%BD%D0%B0%D0%BB" target="_blank">Подробнее о методике</a></div>
 </div>
 <script>
-function showTab(name){
-  document.querySelectorAll('.tab-content').forEach(d=>d.classList.remove('active'));
-  document.getElementById(name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('[data-tab="'+name+'"]').classList.add('active');
+function fmt(n){return n.toFixed(2);}
+function yr(n){return n.toFixed(1);}
+function highlight(n){return n<3?'<span class="yellow">'+yr(n)+'</span>':yr(n);}
+function display(id,d,br){
+  const verdict=d>0?'Выгодно владеть от '+yr(br)+' лет':'Аренда остаётся дешевле (финансово не окупается)';
+  const cls=d>0?'green':'red';
+  const brText=br===Infinity?'∞':highlight(br);
+  document.getElementById(id).innerHTML=
+    '<table><tr><td>Годовой перевес недвижимости над альтернативой </td><td>'+fmt(d)+' %</td></tr>'+
+    '<tr><td>Break-even, лет</td><td>'+brText+'</td></tr></table>'+
+    '<div class=\"verdict '+cls+'\">'+verdict+'</div>';
 }
-
-document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));
-
-function fmt(num){return num.toFixed(2);} // percent
-function fmtYr(num){return num.toFixed(1);} // years
-function highlight(years){return years<3?'<span class="yellow">'+fmtYr(years)+'</span>':fmtYr(years);}
-
 function calcCash(){
   const price=+document.getElementById('price').value,
         rent=+document.getElementById('rent').value,
+        occupancy=+document.getElementById('occupancy').value,
+        opex=+document.getElementById('opex').value,
         tx=+document.getElementById('txCost').value,
         growth=+document.getElementById('growth').value,
         alt=+document.getElementById('altReturn').value;
-  if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent*12/price*100;
-  const d=net+growth-alt;
-  let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
-  const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
-    '<tr><td>Годовой перевес недвижимости над альтернативой d</td><td>'+fmt(d)+' %</td></tr>'+
-    (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
-    '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
-  document.getElementById('cashOutput').innerHTML=html;
+  if([price,rent,occupancy,opex,tx,growth,alt].some(v=>v<=0)){alert('Введите положительные значения');return;}
+  const grossYield=(rent*occupancy/100)/price*100;
+  const netRentYield=grossYield-opex;
+  const d=netRentYield+growth-alt;
+  const br=d<=0?Infinity:tx/d;
+  display('cashOutput',d,br);
 }
-
 function calcMortgage(){
   const price=+document.getElementById('priceM').value,
         rent=+document.getElementById('rentM').value,
+        occupancy=+document.getElementById('occupancyM').value,
+        opex=+document.getElementById('opexM').value,
         tx=+document.getElementById('txCostM').value,
         growth=+document.getElementById('growthM').value,
         intr=+document.getElementById('interest').value,
         ltv=+document.getElementById('ltv').value,
         alt=+document.getElementById('altReturnM').value;
-  if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent*12/price*100;
+  if([price,rent,occupancy,opex,tx,growth,intr,ltv,alt].some(v=>v<=0)){alert('Введите положительные значения');return;}
+  const grossYield=(rent*occupancy/100)/price*100;
+  const netRentYield=grossYield-opex;
   const downFrac=1-ltv/100;
-  const d=net+growth-(intr*ltv/100)-(downFrac*alt);
-  let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
-  const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
-    '<tr><td>Годовой перевес недвижимости над альтернативой d</td><td>'+fmt(d)+' %</td></tr>'+
-    (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
-    '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
-  document.getElementById('mortgageOutput').innerHTML=html;
+  const d=netRentYield+growth-(intr*ltv/100)-(downFrac*alt);
+  const br=d<=0?Infinity:tx/d;
+  display('mortgageOutput',d,br);
 }
-
+calcCash();
 document.getElementById('calcCash').onclick=calcCash;
 document.getElementById('calcMort').onclick=calcMortgage;
 </script>
