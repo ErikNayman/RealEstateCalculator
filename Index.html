@@ -30,7 +30,7 @@
   <h1>Rent vs Buy Calculator</h1>
   <div class="tabs">
     <button class="tab-btn active" data-tab="cash">Cash purchase</button>
-    <button class="tab-btn" data-tab="mortgage">Mortgage (єОселя 7 %)</button>
+    <button class="tab-btn" data-tab="mortgage">Mortgage</button>
   </div>
 
   <div id="cash" class="tab-content active">
@@ -57,7 +57,7 @@
   </div>
 
   <div id="mortgage" class="tab-content">
-    <h2>Mortgage (єОселя 7 %)</h2>
+    <h2>Mortgage</h2>
     <div class="inputs">
       <label>Purchase price, $<span class="tip" title="Стоимость недвижимости">ℹ️</span>
         <input id="priceM" type="number" min="0" step="0.1" value="90000">
@@ -110,7 +110,7 @@ function calcCash(){
   const net=rent*12/price*100;
   const d=net+growth-alt;
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Покупка выгоднее через '+fmtYr(br)+' лет'; cls='green'; }
+  if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Δ-spread d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
@@ -131,7 +131,7 @@ function calcMortgage(){
   const downFrac=1-ltv/100;
   const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Покупка выгоднее через '+fmtYr(br)+' лет'; cls='green'; }
+  if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Δ-spread d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
