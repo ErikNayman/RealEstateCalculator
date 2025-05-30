@@ -39,8 +39,8 @@
       <label>Purchase price, $<span class="tip" title="Сколько стоит жильё">ℹ️</span>
         <input id="price" type="number" min="0" step="0.1" value="90000">
       </label>
-      <label>Annual rent, $<span class="tip" title="Сумма аренды за год">ℹ️</span>
-        <input id="rent" type="number" min="0" step="0.1" value="5400">
+      <label>Monthly rent, $<span class="tip" title="Сумма аренды за месяц">ℹ️</span>
+        <input id="rent" type="number" min="0" step="0.1" value="450">
       </label>
       <label>Round-trip transaction cost, %<span class="tip" title="Комиссии при покупке и продаже">ℹ️</span>
         <input id="txCost" type="number" min="0" step="0.1" value="8">
@@ -62,8 +62,8 @@
       <label>Purchase price, $<span class="tip" title="Стоимость недвижимости">ℹ️</span>
         <input id="priceM" type="number" min="0" step="0.1" value="90000">
       </label>
-      <label>Annual rent, $<span class="tip" title="Годовая аренда">ℹ️</span>
-        <input id="rentM" type="number" min="0" step="0.1" value="5400">
+      <label>Monthly rent, $<span class="tip" title="Месячная аренда">ℹ️</span>
+        <input id="rentM" type="number" min="0" step="0.1" value="450">
       </label>
       <label>Round-trip transaction cost, %<span class="tip" title="Все комиссии">ℹ️</span>
         <input id="txCostM" type="number" min="0" step="0.1" value="8">
@@ -107,7 +107,7 @@ function calcCash(){
         growth=+document.getElementById('growth').value,
         alt=+document.getElementById('altReturn').value;
   if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent/price*100;
+  const net=rent*12/price*100;
   const d=net+growth-alt;
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Покупка выгоднее через '+fmtYr(br)+' лет'; cls='green'; }
@@ -127,7 +127,7 @@ function calcMortgage(){
         ltv=+document.getElementById('ltv').value,
         alt=+document.getElementById('altReturnM').value;
   if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent/price*100;
+  const net=rent*12/price*100;
   const downFrac=1-ltv/100;
   const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
