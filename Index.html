@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Option RUO Calculator – Polygon Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-3xl bg-white shadow-xl rounded-2xl p-8 space-y-6">
+        <h1 id="title" class="text-2xl font-semibold text-center">American Options — «Missed Upside» (RUO) — Polygon</h1>
+        <div class="text-right">
+          <button id="helpBtn" class="text-sm text-blue-600 underline">❔ Help</button>
+        </div>
+
+    <!-- ╔═══ AUTO-FILL (Polygon) ═══╗ -->
+    <div class="grid grid-cols-2 gap-4">
+      <label class="flex flex-col">
+        <span class="text-sm">Ticker</span><span class="ml-1 cursor-help text-slate-400" title="Underlying ticker symbol (e.g. AAPL)">ⓘ</span>
+        <input id="ticker" placeholder="AAPL" class="border rounded-lg px-3 py-2 uppercase tracking-wide">
+      </label>
+
+     <label class="flex flex-col">
+        <span class="text-sm">Option type</span><span class="ml-1 cursor-help text-slate-400" title="Select put or call contract">ⓘ</span>
+        <select id="optionType" class="border rounded-lg px-3 py-2">
+          <option value="put">Put</option>
+          <option value="call">Call</option>
+        </select>
+      </label>
+      
+      <label class="flex flex-col">
+        <span class="text-sm">Expiration date</span><span class="ml-1 cursor-help text-slate-400" title="Option expiration (auto list from Polygon)">ⓘ</span>
+        <select id="expSelect" class="border rounded-lg px-3 py-2"></select>
+      </label>
+
+      <label class="flex flex-col">
+          <span id="strikeLabel" class="text-sm">Strike (put)</span><span class="ml-1 cursor-help text-slate-400" title="Strike price of selected contract">ⓘ</span>
+        <select id="strikeSelect" class="border rounded-lg px-3 py-2"></select>
+      </label>
+
+            <!-- Show IV button placed right after strike selection -->
+      <button id="ivBtn" class="col-span-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-3 font-semibold">Show IV</button>
+
+      <label class="flex flex-col">
+      <span class="text-sm">Strike K (auto-filled)</span><span class="ml-1 cursor-help text-slate-400" title="Numeric strike extracted from contract">ⓘ</span>
+  <input id="K" readonly class="border rounded-lg px-3 py-2 bg-slate-100">
+</label>
+
+      <label class="flex flex-col">
+      <span class="text-sm">Days to expiration</span><span class="ml-1 cursor-help text-slate-400" title="Time to expiry calculated from selected date">ⓘ</span>
+        <input id="days" readonly class="border rounded-lg px-3 py-2 bg-slate-100">
+      </label>
+
+      <label class="flex flex-col">
+        <span class="text-sm">Volatility σ (IV, annual)</span><span class="ml-1 cursor-help text-slate-400" title="Annualised implied volatility (auto from Polygon, editable)">ⓘ</span>
+        <input id="sigma" class="border rounded-lg px-3 py-2 bg-slate-100">
+      </label>
+
+      <label class="flex flex-col">
+        <span class="text-sm">Risk‑free rate r (auto FRED)</span><span class="ml-1 cursor-help text-slate-400" title="3‑month Treasury yield from FRED">ⓘ</span>
+        <input id="r" class="border rounded-lg px-3 py-2 bg-slate-100">
+      </label>
+
+      <label class="flex flex-col">
+        <span class="text-sm">Dividend yield q (auto Polygon)</span><span class="ml-1 cursor-help text-slate-400" title="Annual dividend yield retrieved from Polygon">ⓘ</span>
+        <input id="q" value="0" class="border rounded-lg px-3 py-2 bg-slate-100">
+      </label>
+
+      <!-- simulation fine‑tune -->
+      <label class="flex flex-col">
+        <span class="text-sm">Binomial price steps</span><span class="ml-1 cursor-help text-slate-400" title="CRR binomial tree depth">ⓘ</span>
+        <input id="priceSteps" type="number" value="200" step="10" class="border rounded-lg px-3 py-2">
+      </label>
+      <label class="flex flex-col">
+        <span class="text-sm">RUO simulations N</span><span class="ml-1 cursor-help text-slate-400" title="Monte Carlo paths for RUO estimation">ⓘ</span>
+        <input id="N" type="number" value="35000" step="1000" class="border rounded-lg px-3 py-2">
+      </label>
+      <label class="flex flex-col">
+        <span class="text-sm">RUO steps / year</span><span class="ml-1 cursor-help text-slate-400" title="Simulation steps per year for RUO">ⓘ</span>
+        <input id="steps" type="number" value="252" step="1" class="border rounded-lg px-3 py-2">
+      </label>
+    </div>
+
+
+    
+   
+    
+    <!-- calculate -->
+    <button id="calcBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-3 font-semibold">Calculate</button>
+    <div id="output" class="text-lg font-mono whitespace-pre-wrap"></div>
+     <!-- correlate -->
+    <button id="corrBtn"
+            class="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-lg py-3 font-semibold">
+      Plot RUO correlations
+    </button>
+    <canvas id="ruoTimeChart" height="220" class="hidden my-4">RUO time correlation chart</canvas>
+    <canvas id="ruoStrikeChart" height="220" class="hidden">RUO strike correlation chart</canvas>
+    <div id="advise" class="mt-4 text-sm text-slate-600 italic"></div>
+  </div>
+
+<!-- Help modal -->
+  <div id="helpModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div id="helpBackdrop" class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white w-11/12 max-w-xl p-6 rounded-lg space-y-4">
+      <button id="helpClose" class="absolute top-2 right-2 text-xl">&times;</button>
+      <h2 class="text-lg font-semibold">Quick start</h2>
+      <ul class="list-disc pl-5 space-y-1 text-sm">
+        <li>Enter ticker</li>
+        <li>Select option type</li>
+        <li>Pick expiration date</li>
+        <li>Choose strike</li>
+        <li>Click "Show IV" to auto-fill fields</li>
+        <li>Adjust parameters if needed</li>
+        <li>Press "Calculate"</li>
+        <li>Review output and advice</li>
+      </ul>
+      <h3 class="font-semibold text-sm">Rule‑of‑thumb sell thresholds</h3>
+      <table class="w-full text-sm mt-2 border-t border-slate-200">
+        <thead>
+          <tr><th class="pr-4 py-1 text-left">Option</th><th class="py-1 text-left">Market price &gt; fair ×</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="pr-4 py-1">Call</td><td class="py-1">1.08</td></tr>
+          <tr><td class="pr-4 py-1">Put</td><td class="py-1">1.15</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+/***** INSERT YOUR KEYS *****/
+const POLY_KEY ='FZoOcCquuY_stuldWSL6ArpJs4FowbSk'; // ← обязательный
+const FRED_KEY = '4ac63c06eb656b4d8abac857c3cd8e68';    // ← опционально (для r)
+/********************************/ 
+
+/*──────────── helpers ───────────*/
+const todaySec = () => Date.now()/1000;
+const isoToDays = iso => Math.max(Math.round((new Date(iso)-Date.now())/864e5),0);
+
+  // universal IV extractor supporting various Polygon fields
+function getIV(opt){
+  return opt.greeks?.mid_iv
+      ?? opt.greeks?.implied_volatility
+      ?? opt.day?.implied_volatility
+      ?? opt.iv
+      ?? opt.implied_volatility
+      ?? 0;
+}
+
+/*──────────── API fetchers (Polygon Basic) ───────────*/
+
+/* 1. Все даты экспираций */
+async function fetchExpirations(tkr){
+  const base = `https://api.polygon.io/v3/reference/options/contracts`
+             + `?underlying_ticker=${tkr}`
+             + `&limit=999`
+             + `&apiKey=${POLY_KEY}`;
+
+  const proxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+              + encodeURIComponent(base);
+
+  let js = await fetch(base).then(r => r.json()).catch(() => null);
+  if(!js){
+    js = await fetch(proxy).then(r => r.json()).catch(() => ({}));
+  }
+
+  /* собираем уникальные даты и сортируем */
+  const set = new Set((js.results || []).map(o => o.expiration_date));
+  return Array.from(set).sort();     // ['2024-10-18', '2024-11-15', …]
+}
+
+/* 2. Цепочка опционов на выбранную дату */
+async function fetchChain(tkr, isoDate, type){
+const base = `https://api.polygon.io/v3/reference/options/contracts`
+             + `?underlying_ticker=${tkr}`
+             + `&expiration_date=${isoDate}`
+             + `&contract_type=${type}`
+             + `&limit=999`
+             + `&apiKey=${POLY_KEY}`;
+
+  const proxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+              + encodeURIComponent(base);
+
+  let js = await fetch(base).then(r => r.json()).catch(() => null);
+  if(!js){
+    js = await fetch(proxy).then(r => r.json()).catch(() => ({}));
+  }
+    /* преобразуем в [{strike, contract, iv}, ...] */
+  return (js.results || []).map(o => ({
+    strike:   o.strike_price,
+    contract: o.ticker,
+    iv:       0
+  }));
+}
+
+/* 3. Снэпшот по тикеру контракта (нужен тикер базового актива) */
+async function fetchSnapshot(underlyingTicker, contractTicker){
+  const base = `https://api.polygon.io/v3/snapshot/options/${underlyingTicker}/${contractTicker}`
+             + `?apiKey=${POLY_KEY}&greeks=true`;
+
+  const proxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+              + encodeURIComponent(base);
+
+  let js = await fetch(base).then(r => r.json()).catch(() => null);
+  if(!js){
+    js = await fetch(proxy).then(r => r.json()).catch(() => null);
+  }
+  return js && js.results ? js.results : null;
+}
+
+/*──────────── risk‑free FRED ───────────*/
+async function fetchRiskFree(){
+  if(!FRED_KEY) return null;
+
+  // оригинальный URL FRED
+  const base = 'https://api.stlouisfed.org/fred/series/observations'
+             + `?series_id=DGS3MO&api_key=${FRED_KEY}`
+             + '&file_type=json&limit=1&sort_order=desc';
+
+  const proxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+              + encodeURIComponent(base);
+
+ let js = await fetch(base).then(r => r.json()).catch(() => null);
+  if(!js){
+    js = await fetch(proxy).then(r => r.json()).catch(() => null);
+  }
+  if(!js) return null;
+
+  const v = parseFloat(js.observations?.[0]?.value);
+  return isNaN(v) ? null : v/100;   // в десятичный вид
+}
+
+/*──────────── dividend yield (Polygon) ───────────*/
+async function fetchDividendYield(tkr){
+  const base = `https://api.polygon.io/v3/reference/dividends?ticker=${tkr}&limit=120&apiKey=${POLY_KEY}`;
+  const proxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+                + encodeURIComponent(base);
+
+  let js = await fetch(base).then(r => r.json()).catch(() => null);
+  if(!js){
+    js = await fetch(proxy).then(r => r.json()).catch(() => null);
+  }
+  if(!js) return null;
+
+  const now = Date.now();
+  const yr = 365*864e5;
+  let sum = 0;
+  (js.results || []).forEach(d => {
+    const ds = d.payment_date || d.pay_date || d.ex_dividend_date || d.exDate;
+    const ms = ds ? Date.parse(ds) : NaN;
+    if(!isNaN(ms) && ms <= now && now - ms <= yr){
+      const amt = parseFloat(d.cash_amount ?? d.amount);
+      if(!isNaN(amt)) sum += amt;
+    }
+  });
+  if(sum === 0) return 0;
+
+  const quoteUrl = `https://api.polygon.io/v2/aggs/ticker/${tkr}/prev?adjusted=true&apiKey=${POLY_KEY}`;
+  const quoteProxy = 'https://api.allorigins.win/raw?disableCache=true&url='
+                     + encodeURIComponent(quoteUrl);
+
+  let qjs = await fetch(quoteUrl).then(r => r.json()).catch(() => null);
+  if(!qjs){
+    qjs = await fetch(quoteProxy).then(r => r.json()).catch(() => null);
+  }
+  const price = qjs && qjs.results && qjs.results[0] && qjs.results[0].c;
+  return price ? sum/price : null;
+}
+
+/*──────────── DOM elements ───────────*/
+const tickerEl=document.getElementById('ticker');
+const expSel  =document.getElementById('expSelect');
+const strikeSel=document.getElementById('strikeSelect');
+const ivBtn   =document.getElementById('ivBtn');
+const typeSel =document.getElementById('optionType');
+const strikeLabel=document.getElementById('strikeLabel');
+const titleEl=document.getElementById('title');
+  
+  /*──────────── ticker change → expirations ───────────*/
+tickerEl.addEventListener('change',async e=>{
+  const tkr=e.target.value.trim().toUpperCase();
+  if(!tkr) return;
+
+  // expirations
+  const dates=await fetchExpirations(tkr);
+  expSel.innerHTML='';
+  dates.forEach(d=>{expSel.innerHTML+=`<option value="${d}">${d}</option>`;});
+  expSel.dispatchEvent(new Event('change'));
+});
+
+/*──────── option type change ────────*/
+typeSel.addEventListener('change',()=>{
+  strikeLabel.textContent = `Strike (${typeSel.value})`;
+  titleEl.textContent = `American ${typeSel.value.charAt(0).toUpperCase()+typeSel.value.slice(1)} — «Missed Upside» (RUO) — Polygon`;
+  expSel.dispatchEvent(new Event('change'));
+});
+
+  
+  /*──────── expiration → strikes ──────────*/
+expSel.addEventListener('change', async e => {
+  const iso = e.target.value;
+  const tkr = tickerEl.value.trim().toUpperCase();
+  if (!iso || !tkr) return;
+
+  const chain = await fetchChain(tkr, iso, typeSel.value);   // уже содержит strike/contract/iv
+  
+  strikeSel.innerHTML = '';
+  chain.forEach(p => {
+    strikeSel.innerHTML += `<option value="${p.strike}" data-contract="${p.contract}" data-iv="${p.iv}">${p.strike}</option>`;
+  });
+});
+
+
+  /*──────────── Show IV (fills K, sigma, r, days) ───────────*/
+ivBtn.addEventListener('click', async () => {
+  const tkr = tickerEl.value.trim().toUpperCase();
+  const iso = expSel.value;
+  const opt = strikeSel.selectedOptions[0];
+  if(!tkr || !iso || !opt){
+    alert('Select ticker, expiration and strike');
+    return;
+  }
+
+  document.getElementById('days').value = isoToDays(iso);
+  document.getElementById('K').value = opt.value;
+  
+  const contract = opt.dataset.contract;
+  let iv = parseFloat(opt.dataset.iv || 0);
+
+    if(contract){
+    const snap = await fetchSnapshot(tkr, contract);
+    if(snap){
+      iv = getIV(snap);
+    }
+  }
+  document.getElementById('sigma').value = parseFloat(iv).toFixed(4);
+
+  const rVal = await fetchRiskFree();
+  if(rVal !== null) document.getElementById('r').value = rVal.toFixed(4);
+
+  const qVal = await fetchDividendYield(tkr);
+  if(qVal !== null) document.getElementById('q').value = qVal.toFixed(4);
+});
+
+/*──────────── Correlation plots ───────────*/
+const ctxStrike = document.getElementById('ruoStrikeChart');
+let strikeChart = null;
+
+document.getElementById('corrBtn').onclick = async () => {
+  const tkr  = tickerEl.value.trim().toUpperCase();
+  const iso  = expSel.value;
+  const type = typeSel.value;
+  if(!tkr || !iso){ alert('choose ticker & expiry'); return; }
+
+  const quoteUrl = `https://api.polygon.io/v2/aggs/ticker/${tkr}/prev?adjusted=true&apiKey=${POLY_KEY}`;
+  const quote = await fetch(quoteUrl).then(r => r.json()).catch(() => null);
+  const S0 = quote?.results?.[0]?.c;
+  if(!S0){ alert('price fetch failed'); return; }
+
+  const chain = await fetchChain(tkr, iso, type);
+
+  const days  = isoToDays(iso);
+  const T     = days / 365;
+  const r     = parseFloat(document.getElementById('r').value || 0.04);
+  const q     = parseFloat(document.getElementById('q').value || 0.02);
+  const nTree = parseInt(document.getElementById('priceSteps').value) || 200;
+  const Nsim  = parseInt(document.getElementById('N').value) || 30000;
+  const steps = parseInt(document.getElementById('steps').value) || 252;
+
+  const ptsStrike = [];
+
+  for(const c of chain){
+    const snap   = await fetchSnapshot(tkr, c.contract);
+    const iv     = getIV(snap) || 0.25;
+    const sigma  = iv;
+    const fair   = (type === 'put')
+          ? americanPutCRR (S0, c.strike, T, r, q, sigma, nTree)
+          : americanCallCRR(S0, c.strike, T, r, q, sigma, nTree);
+    const ruoObj = (type === 'put')
+          ? ruoPut (S0, c.strike, T, r, q, sigma, Nsim, steps)
+          : ruoCall(S0, c.strike, T, r, q, sigma, Nsim, steps);
+    const ruo = ruoObj.premium;
+
+    ptsStrike.push({ x: c.strike / S0 - 1, y: ruo });
+  }
+
+  ctxStrike.classList.remove('hidden');
+  if(strikeChart) strikeChart.destroy();
+
+  strikeChart = new Chart(ctxStrike, {
+    type: 'scatter',
+    data: { datasets: [{ data: ptsStrike }] },
+    options: { plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Moneyness (K/S0 – 1)' } },
+        y: { title: { display: true, text: 'RUO' } }
+      } }
+  });
+};
+  
+/*──────────── option pricers (same as before) ───────────*/
+function americanPutCRR(S,K,T,r,q,sigma,n){
+  n=Math.max(1,Math.floor(n||1));
+  const dt=T/n,u=Math.exp(sigma*Math.sqrt(dt)),d=1/u,
+        disc=Math.exp(-r*dt),p=(Math.exp((r-q)*dt)-d)/(u-d);
+  const v=Array(n+1);
+  let Su=S*Math.pow(u,n);
+  for(let i=0;i<=n;i++){v[i]=Math.max(K-Su,0);Su*=d*d;}
+  for(let s=n-1;s>=0;s--){
+    for(let i=0;i<=s;i++){
+      const cont=disc*(p*v[i]+(1-p)*v[i+1]);
+      const early=Math.max(K-S*Math.pow(u,s-2*i),0);
+      v[i]=Math.max(cont,early);
+    }
+  }
+  return v[0];
+}
+function americanCallCRR(S,K,T,r,q,sigma,n){
+  n=Math.max(1,Math.floor(n||1));
+  const dt=T/n,u=Math.exp(sigma*Math.sqrt(dt)),d=1/u,
+        disc=Math.exp(-r*dt),p=(Math.exp((r-q)*dt)-d)/(u-d);
+  const v=Array(n+1);
+  let Su=S*Math.pow(u,n);
+  for(let i=0;i<=n;i++){v[i]=Math.max(Su-K,0);Su*=d*d;}
+  for(let s=n-1;s>=0;s--){
+    for(let i=0;i<=s;i++){
+      const cont=disc*(p*v[i+1]+(1-p)*v[i]);
+      const early=Math.max(S*Math.pow(u,s-2*i)-K,0);
+      v[i]=Math.max(cont,early);
+    }
+  }
+  return v[0];
+}
+function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+// Return a Student's t random variate with df degrees of freedom
+function randt(df){
+  const z = randn();
+  let chi = 0;
+  for(let i=0;i<df;i++) chi += randn()**2;
+  return z * Math.sqrt(df / chi);
+}
+function ruoPut(S0,K,T,r,q,sigma,N,stepsPerYear){
+  const tot = Math.max(1, Math.ceil(T*stepsPerYear)),
+        dt  = T/tot,
+        drift = (r-q-0.5*sigma*sigma)*dt;
+  const stepVol = sigma * Math.sqrt(dt);
+
+  let payoffSum = 0,  collapseCnt = 0;
+    for(let i=0;i<N;i++){
+    let S = S0, hit = false;
+    for(let s=0;s<tot;s++){
+      S *= Math.exp(drift + stepVol * randt(5));
+      if(!hit && S <= K) hit = true;          // «кот умер»
+    }
+    if(hit && S > K){                         // «кот ожил»
+      collapseCnt++;
+      payoffSum += S - K;                     // прежний логик RUO-put
+    }
+  }
+  return { premium: collapseCnt ? payoffSum/N : 0,
+           rate    : collapseCnt / N };       // ← доля коллапсов
+}
+function ruoCall(S0,K,T,r,q,sigma,N,stepsPerYear){
+const tot = Math.max(1, Math.ceil(T*stepsPerYear)),
+        dt  = T/tot,
+        drift = (r-q-0.5*sigma*sigma)*dt;
+  const stepVol = sigma * Math.sqrt(dt);
+
+  let payoffSum = 0,  collapseCnt = 0;
+  for(let i=0;i<N;i++){
+    let S = S0, hit = false;
+    for(let s=0;s<tot;s++){
+     S *= Math.exp(drift + stepVol * randt(5));
+      if(!hit && S >= K) hit = true;          // «кот ожил»
+    }
+    if(hit && S < K){                         // «кот снова умер»
+      collapseCnt++;
+      payoffSum += K - S;                     // прежний логик RUO-call
+    }
+  }
+return { premium: collapseCnt ? payoffSum/N : 0,
+           rate    : collapseCnt / N };
+}
+
+  
+/*──────────── Calculate ───────────*/
+document.getElementById('calcBtn').onclick=async ()=>{
+  const g=id=>parseFloat(document.getElementById(id).value);
+  const tkr=tickerEl.value.trim().toUpperCase();
+  if(!tkr){alert('Enter ticker');return;}
+  const opt=strikeSel.selectedOptions[0];
+  const contract=opt?opt.dataset.contract:null;
+  let marketPrice=null;
+  if(contract){
+    const snap=await fetchSnapshot(tkr,contract);
+    if(snap){
+      marketPrice=parseFloat(snap.day?.close)||parseFloat(snap.last_quote?.mid)||null;
+    }
+  }
+  const quoteUrl=`https://api.polygon.io/v2/aggs/ticker/${tkr}/prev?adjusted=true&apiKey=${POLY_KEY}`;
+  const js=await fetch(quoteUrl).then(r=>r.json()).catch(()=>null);
+  const S0=js&&js.results&&js.results[0]&&js.results[0].c;
+  if(!S0){alert('Price fetch failed');return;}
+    const K = g('K'),
+      days = g('days'),
+      sigma = g('sigma') || 0.25,   // default 25 % если поле пустое
+      r = g('r')     || 0.043,       // default 4.3 %
+      q = g('q')     || 0.02,      // default 2 %
+      N=g('N'),steps=g('steps'),nTree=g('priceSteps');
+    if(!K||!days||!sigma){alert('Missing strike / sigma / days');return;}
+    const T=days/365;
+    let amer, ruoObj, fair, msg;
+    if(typeSel.value==='call'){
+        amer  = americanCallCRR(S0,K,T,r,q,sigma,nTree);
+      ruoObj= ruoCall(S0,K,T,r,q,sigma,N,steps);          // ★
+      fair  = amer + ruoObj.premium;                      // ★
+      const amerPct = (amer / fair) * 100;
+      const ruoPct  = (ruoObj.premium / fair) * 100;
+      msg = `Underlying S0:          ${S0.toFixed(2)}\nAmerican call (CRR):     ${amer.toFixed(4)} (${amerPct.toFixed(1)}%)\nRUO (missed-downside):   ${ruoObj.premium.toFixed(4)} (${ruoPct.toFixed(1)}%)\nCollapse freq:           ${(ruoObj.rate*100).toFixed(1)} %\n———————————————\nFair call premium:       ${fair.toFixed(4)}\nMarket price:           ${marketPrice!==null?marketPrice.toFixed(4):'N/A'}`;
+    } else {
+      amer  = americanPutCRR(S0,K,T,r,q,sigma,nTree);
+      ruoObj= ruoPut(S0,K,T,r,q,sigma,N,steps);           // ★
+      fair  = amer + ruoObj.premium;                      // ★
+      const amerPct = (amer / fair) * 100;
+      const ruoPct  = (ruoObj.premium / fair) * 100;
+      msg = `Underlying S0:          ${S0.toFixed(2)}\nAmerican put (CRR):      ${amer.toFixed(4)} (${amerPct.toFixed(1)}%)\nRUO (missed-upside):     ${ruoObj.premium.toFixed(4)} (${ruoPct.toFixed(1)}%)\nCollapse freq:           ${(ruoObj.rate*100).toFixed(1)} %\n———————————————\nFair put premium:        ${fair.toFixed(4)}\nMarket price:           ${marketPrice!==null?marketPrice.toFixed(4):'N/A'}`;
+    }
+    const buffer = [];
+    if(typeSel.value === 'put' && marketPrice!==null && fair*1.15 < marketPrice)
+        buffer.push('▶ Рыночная премия > fair×1.15 — SELL candidate');
+    if(typeSel.value === 'call' && marketPrice!==null && fair*1.08 < marketPrice)
+        buffer.push('▶ Рыночная премия > fair×1.08 — SELL candidate');
+    if(ruoObj.rate > 0.3) buffer.push('⚠ Высокий риск коллапса (Collapse freq > 30%): будьте готовы рулить');
+
+      document.getElementById('advise').textContent = buffer.join('  |  ');
+  document.getElementById('output').textContent=msg;
+};
+
+// Help modal handlers
+const helpBtn = document.getElementById('helpBtn');
+const helpModal = document.getElementById('helpModal');
+const helpBackdrop = document.getElementById('helpBackdrop');
+const helpClose = document.getElementById('helpClose');
+function closeHelp(){ helpModal.classList.add('hidden'); }
+helpBtn.addEventListener('click', ()=> helpModal.classList.remove('hidden'));
+helpClose.addEventListener('click', closeHelp);
+helpBackdrop.addEventListener('click', closeHelp);
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeHelp(); });
+
+</script>
+<style>
+  #output { line-height: 1.4; }
+</style>
+</body>
+</html>
