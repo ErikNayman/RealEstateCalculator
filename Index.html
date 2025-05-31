@@ -126,17 +126,18 @@ function calcCash(){
 }
 
 function calcMortgage(){
-  const price=+document.getElementById('priceM').value,
-        rent=+document.getElementById('rentM').value,
-        occ=+document.getElementById('occupancyM').value,
-        growth=+document.getElementById('growthM').value,
-        intr=+document.getElementById('interest').value,
-        ltv=+document.getElementById('ltv').value,
-        alt=+document.getElementById('altReturnM').value;
-  if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent*12/price*100;
-  const net=rent*occ/100*12/price*100;
-  const d=net+growth-(intr*ltv/100)-(downFrac*alt);
+    const price=+document.getElementById('priceM').value,
+          rent=+document.getElementById('rentM').value,
+          occ=+document.getElementById('occupancyM').value,
+          growth=+document.getElementById('growthM').value,
+          intr=+document.getElementById('interest').value,
+          ltv=+document.getElementById('ltv').value,
+          alt=+document.getElementById('altReturnM').value;
+    if(price<=0||rent<=0){alert('Enter positive values');return;}
+    const tx = +document.getElementById('txCostM').value;
+    const downFrac = 1 - ltv/100;
+    const net=rent*occ/100*12/price*100;
+    const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Финансово не окупается при указанных параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Выгодно владеть от '+fmtYr(br)+' лет'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
