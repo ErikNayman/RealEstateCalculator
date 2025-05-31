@@ -117,7 +117,7 @@ function calcCash(){
   const net=rent*occ/100*12/price*100;
   const d=net+growth-alt;
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Вигідно володіти від'+fmtYr(br)+' років'; cls='green'; }
+  if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Річна перевага нерухомості над альтернативою d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
@@ -139,7 +139,7 @@ function calcMortgage(){
     const net=rent*occ/100*12/price*100;
     const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
-  if(d>0){ br=tx/d; verdict='Вигідно володіти від'+fmtYr(br)+' років'; cls='green'; }
+  if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
   const html='<table><tr><td>Net Rent Yield</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Річна перевага нерухомості над альтернативою d</td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Break-even years</td><td>'+highlight(br)+'</td></tr>')+
