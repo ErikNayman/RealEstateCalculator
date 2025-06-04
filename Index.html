@@ -39,70 +39,70 @@
 </head>
 <body>
 <div class="container">
-  <h1>Rent vs Buy Calculator</h1>
+  <h1>Купувати або орендувати калькулятор</h1>
   <div class="tabs">
-    <button class="tab-btn active" data-tab="cash">Cash purchase</button>
-    <button class="tab-btn" data-tab="mortgage">Mortgage</button>
+    <button class="tab-btn active" data-tab="cash">Купую за свої</button>
+    <button class="tab-btn" data-tab="mortgage">Купую в іпотеку</button>
   </div>
 
   <div id="cash" class="tab-content active">
-    <h2>Cash purchase</h2>
+    <h2>Купую за свої</h2>
     <div class="inputs">
-      <label>Purchase price, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
+      <label>Ціна покупки, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
         <input id="price" type="number" min="0" step="500" value="100000">
       </label>
-      <label>Monthly rent (net), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
+      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
         <input id="rent" type="number" min="0" step="10" value="500">
       </label>
-      <label>Occupancy rate, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
+      <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancy" type="number" min="0" max="100" step="1" value="100">
       </label>
-      <label>Round-trip transaction cost, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
+      <label>Вартість транзакції купити-продати, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
         <input id="txCost" type="number" min="0" step="0.1" value="8">
       </label>
-      <label>Expected price growth (USD), % / yr<span class="tip" title="Очікуване зростання вартості житла на рік (в USD)">ℹ️</span>
+      <label>Очікуване зростання цін (USD), % / yr<span class="tip" title="Очікуване зростання вартості житла на рік (в USD)">ℹ️</span>
         <input id="growth" type="number" min="0" step="0.1" value="3">
       </label>
-      <label>Alternative return (USD), % / yr<span class="tip" title="Прибутковість альтернативних інвестицій (наприклад ОВГЗ-USD під 4%)">ℹ️</span>
+      <label>Альтернативний дохід (USD), % / yr<span class="tip" title="Прибутковість альтернативних інвестицій (наприклад ОВГЗ-USD під 4%)">ℹ️</span>
         <input id="altReturn" type="number" min="0" step="0.1" value="6">
       </label>
     </div>
     <button id="calcCash" class="calc-btn">Calculate</button>
     <div id="cashOutput" class="results"></div>
-    <p class="disclaimer">* Estimates do not account for taxes or maintenance.</p>
+    <p class="disclaimer">* Оцінки не враховують податки та витрати на обслуговування.</p>
   </div>
 
   <div id="mortgage" class="tab-content">
-    <h2>Mortgage</h2>
+    <h2>Купую в іпотеку</h2>
     <div class="inputs">
-      <label>Purchase price, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
+      <label>Ціна покупки, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
         <input id="priceM" type="number" min="0" step="500" value="100000">
       </label>
-      <label>Monthly rent (net), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
+      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
         <input id="rentM" type="number" min="0" step="10" value="500">
       </label>
-      <label>Occupancy rate, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
+      <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancyM" type="number" min="0" max="100" step="1" value="100">
       </label>
-      <label>Round-trip transaction cost, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
+      <label>Вартість транзакції купити-продати, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
         <input id="txCostM" type="number" min="0" step="0.1" value="8">
       </label>
-      <label>Expected price growth (USD), % / yr<span class="tip" title="Очікуване зростання вартості житла на рік (в USD)">ℹ️</span>
+      <label>Очікуване зростання цін (USD), % / yr<span class="tip" title="Очікуване зростання вартості житла на рік (в USD)">ℹ️</span>
         <input id="growthM" type="number" min="0" step="0.1" value="3">
       </label>
-      <label>Mortgage rate, % / yr<span class="tip" title="Відсоток за кредитом">ℹ️</span>
+      <label>Іпотечна ставка, % / yr<span class="tip" title="Відсоток за кредитом">ℹ️</span>
         <input id="interest" type="number" min="0" step="0.1" value="7">
       </label>
-      <label>LTV (loan / price), %<span class="tip" title="Розмір кредиту в % від ціни">ℹ️</span>
+      <label>LTV (борг / ціна), %<span class="tip" title="Розмір кредиту в % від ціни">ℹ️</span>
         <input id="ltv" type="number" min="0" step="1" value="80">
       </label>
-      <label>Alternative return (USD), % / yr<span class="tip" title="Прибутковість альтернативних інвестицій (наприклад ОВГЗ-USD під 4%)">ℹ️</span>
+      <label>Альтернативний дохід (USD), % / yr<span class="tip" title="Прибутковість альтернативних інвестицій (наприклад ОВГЗ-USD під 4%)">ℹ️</span>
         <input id="altReturnM" type="number" min="0" step="0.1" value="6">
       </label>
     </div>
     <button id="calcMort" class="calc-btn">Calculate</button>
     <div id="mortgageOutput" class="results"></div>
-    <p class="disclaimer">* Estimates do not account for taxes or maintenance.</p>
+    <p class="disclaimer">* Оцінки не враховують податки та витрати на обслуговування.</p>
   </div>
   <div class="footer"><a href="https://t.me/HugsFund" target="_blank">Детальніше про методику</a></div>
 </div>
