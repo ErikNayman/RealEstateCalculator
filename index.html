@@ -51,11 +51,14 @@
       <label>Ціна покупки, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
         <input id="price" type="number" min="0" step="500" value="100000">
       </label>
-      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
+      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди, яку сплачує орендар">ℹ️</span>
         <input id="rent" type="number" min="0" step="10" value="500">
       </label>
       <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancy" type="number" min="0" max="100" step="1" value="100">
+      </label>
+            <label>Витрати на утримання, % / yr<span class="tip" title="Ремонт, страховка тощо в процентах від вартості житла на рік">ℹ️</span>
+        <input id="expenses" type="number" min="0" step="0.1" value="1">
       </label>
       <label>Вартість транзакції купити-продати, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
         <input id="txCost" type="number" min="0" step="0.1" value="8">
@@ -69,7 +72,7 @@
     </div>
     <button id="calcCash" class="calc-btn">Calculate</button>
     <div id="cashOutput" class="results"></div>
-    <p class="disclaimer">* Оцінки не враховують податки та витрати на обслуговування.</p>
+    <p class="disclaimer">* Оцінки не враховують податки.</p>
   </div>
 
   <div id="mortgage" class="tab-content">
@@ -78,11 +81,14 @@
       <label>Ціна покупки, $<span class="tip" title="Скільки коштує житло">ℹ️</span>
         <input id="priceM" type="number" min="0" step="500" value="100000">
       </label>
-      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць (чистими на руки)">ℹ️</span>
+      <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць, яку сплачує орендар">ℹ️</span>
         <input id="rentM" type="number" min="0" step="10" value="500">
       </label>
       <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancyM" type="number" min="0" max="100" step="1" value="100">
+      </label>
+            <label>Витрати на утримання, % / yr<span class="tip" title="Ремонт, страховка тощо в процентах від вартості житла на рік">ℹ️</span>
+        <input id="expensesM" type="number" min="0" step="0.1" value="1">
       </label>
       <label>Вартість транзакції купити-продати, %<span class="tip" title="Витрати (комісії, податки тощо) при купівлі та продажу">ℹ️</span>
         <input id="txCostM" type="number" min="0" step="0.1" value="8">
@@ -102,7 +108,7 @@
     </div>
     <button id="calcMort" class="calc-btn">Calculate</button>
     <div id="mortgageOutput" class="results"></div>
-    <p class="disclaimer">* Оцінки не враховують податки та витрати на обслуговування.</p>
+    <p class="disclaimer">* Оцінки не враховують податки.</p>
   </div>
   <div class="footer"><a href="https://t.me/HugsFund/16294" target="_blank">Детальніше про методику</a></div>
 </div>
@@ -124,15 +130,20 @@ function calcCash(){
   const price=+document.getElementById('price').value,
         rent=+document.getElementById('rent').value,
         occ=+document.getElementById('occupancy').value,
+        exp=+document.getElementById('expenses').value,
         tx=+document.getElementById('txCost').value,
         growth=+document.getElementById('growth').value,
         alt=+document.getElementById('altReturn').value;
   if(price<=0||rent<=0){alert('Enter positive values');return;}
-  const net=rent*occ/100*12/price*100;
+  const gross=rent*occ/100*12/price*100;
+  const net=gross-exp;
   const d=net+growth-alt;
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
-  const html='<table><tr><td>Чистий орендний дохід, % річних</td><td>'+fmt(net)+' %</td></tr>'+
+    const html='<table>'+
+    '<tr><td>Gross орендний дохід, % річних</td><td>'+fmt(gross)+' %</td></tr>'+
+    '<tr><td>Операційні витрати, % річних</td><td>'+fmt(exp)+' %</td></tr>'+
+    '<tr><td>Net орендний дохід, % річних</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Річна перевага нерухомості над альтернативою </td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Вигідно володіти від ... років</td><td>'+highlight(br)+'</td></tr>')+
     '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
@@ -143,6 +154,7 @@ function calcMortgage(){
     const price=+document.getElementById('priceM').value,
           rent=+document.getElementById('rentM').value,
           occ=+document.getElementById('occupancyM').value,
+          exp=+document.getElementById('expensesM').value,
           growth=+document.getElementById('growthM').value,
           intr=+document.getElementById('interest').value,
           ltv=+document.getElementById('ltv').value,
@@ -150,11 +162,15 @@ function calcMortgage(){
     if(price<=0||rent<=0){alert('Enter positive values');return;}
     const tx = +document.getElementById('txCostM').value;
     const downFrac = 1 - ltv/100;
-    const net=rent*occ/100*12/price*100;
+    const gross=rent*occ/100*12/price*100;
+    const net=gross-exp;
     const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
-  const html='<table><tr><td>Чистий орендний дохід, % річних</td><td>'+fmt(net)+' %</td></tr>'+
+  const html='<table>'+
+    '<tr><td>Gross орендний дохід, % річних</td><td>'+fmt(gross)+' %</td></tr>'+
+    '<tr><td>Операційні витрати, % річних</td><td>'+fmt(exp)+' %</td></tr>'+
+    '<tr><td>Net орендний дохід, % річних</td><td>'+fmt(net)+' %</td></tr>'+
     '<tr><td>Річна перевага нерухомості над альтернативою </td><td>'+fmt(d)+' %</td></tr>'+
     (br===Infinity?'' : '<tr><td>Вигідно володіти від ... років</td><td>'+highlight(br)+'</td></tr>')+
     '</table><div class="'+cls+'">'+(br===Infinity?verdict:verdict)+'</div>';
