@@ -54,6 +54,9 @@
       <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди, яку сплачує орендар">ℹ️</span>
         <input id="rent" type="number" min="0" step="10" value="500">
       </label>
+      <label>Щорічне підвищення оренди, %<span class="tip" title="На скільки відсотків зростатиме оренда кожного року">ℹ️</span>
+        <input id="rentGrowth" type="number" min="0" step="0.1" value="6">
+      </label>
       <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancy" type="number" min="0" max="100" step="1" value="100">
       </label>
@@ -83,6 +86,9 @@
       </label>
       <label>Місячна оренда (чистою сумою), $<span class="tip" title="Сума оренди за місяць, яку сплачує орендар">ℹ️</span>
         <input id="rentM" type="number" min="0" step="10" value="500">
+      </label>
+      <label>Щорічне підвищення оренди, %<span class="tip" title="На скільки відсотків зростатиме оренда кожного року">ℹ️</span>
+        <input id="rentGrowthM" type="number" min="0" step="0.1" value="6">
       </label>
       <label>Коефіцієнт заповнюваності, %<span class="tip" title="Середній рівень завантаження">ℹ️</span>
         <input id="occupancyM" type="number" min="0" max="100" step="1" value="100">
@@ -129,6 +135,7 @@ function highlight(years){return years<3?'<span class="yellow">'+fmtYr(years)+'<
 function calcCash(){
   const price=+document.getElementById('price').value,
         rent=+document.getElementById('rent').value,
+        rentInc=+document.getElementById('rentGrowth').value,
         occ=+document.getElementById('occupancy').value,
         exp=+document.getElementById('expenses').value,
         tx=+document.getElementById('txCost').value,
@@ -136,6 +143,7 @@ function calcCash(){
         alt=+document.getElementById('altReturn').value;
   if(price<=0||rent<=0){alert('Enter positive values');return;}
   const gross=rent*occ/100*12/price*100;
+  const d=net+rentInc+growth-alt;
   const net=gross-exp;
   const d=net+growth-alt;
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
@@ -152,6 +160,7 @@ function calcCash(){
 
 function calcMortgage(){
     const price=+document.getElementById('priceM').value,
+          rentInc=+document.getElementById('rentGrowthM').value,
           rent=+document.getElementById('rentM').value,
           occ=+document.getElementById('occupancyM').value,
           exp=+document.getElementById('expensesM').value,
@@ -163,6 +172,7 @@ function calcMortgage(){
     const tx = +document.getElementById('txCostM').value;
     const downFrac = 1 - ltv/100;
     const gross=rent*occ/100*12/price*100;
+    const d=net+rentInc+growth-(intr*ltv/100)-(downFrac*alt);
     const net=gross-exp;
     const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
