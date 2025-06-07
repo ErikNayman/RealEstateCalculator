@@ -145,7 +145,6 @@ function calcCash(){
   const gross=rent*occ/100*12/price*100;
   const d=net+rentInc+growth-alt;
   const net=gross-exp;
-  const d=net+growth-alt;
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
     const html='<table>'+
@@ -174,7 +173,6 @@ function calcMortgage(){
     const gross=rent*occ/100*12/price*100;
     const d=net+rentInc+growth-(intr*ltv/100)-(downFrac*alt);
     const net=gross-exp;
-    const d=net+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
   const html='<table>'+
