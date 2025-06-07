@@ -143,8 +143,8 @@ function calcCash(){
         alt=+document.getElementById('altReturn').value;
   if(price<=0||rent<=0){alert('Enter positive values');return;}
   const gross=rent*occ/100*12/price*100;
-  const d=net+rentInc+growth-alt;
   const net=gross-exp;
+  const d=net+rentInc+growth-alt;
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
     const html='<table>'+
@@ -171,8 +171,8 @@ function calcMortgage(){
     const tx = +document.getElementById('txCostM').value;
     const downFrac = 1 - ltv/100;
     const gross=rent*occ/100*12/price*100;
-    const d=net+rentInc+growth-(intr*ltv/100)-(downFrac*alt);
     const net=gross-exp;
+    const d=net+rentInc+growth-(intr*ltv/100)-(downFrac*alt);
   let br=Infinity, verdict='Фінансово не окупається при зазначених параметрах',cls='red';
   if(d>0){ br=tx/d; verdict='Вигідно володіти від '+fmtYr(br)+' років'; cls='green'; }
   const html='<table>'+
